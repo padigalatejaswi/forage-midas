@@ -5,6 +5,8 @@ import com.jpmc.midascore.entity.UserRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal; // 👈 NEW IMPORT
+
 @Component
 public class UserPopulator {
     @Autowired
@@ -17,7 +19,12 @@ public class UserPopulator {
         String[] userLines = fileLoader.loadStrings("/test_data/lkjhgfdsa.hjkl");
         for (String userLine : userLines) {
             String[] userData = userLine.split(", ");
-            UserRecord user = new UserRecord(userData[0], Float.parseFloat(userData[1]));
+
+            // 🚨 CORRECTED LINE: Convert string directly to BigDecimal for precision
+            BigDecimal balance = new BigDecimal(userData[1].trim());
+
+            // Note: Use 'UserRecord' or 'User' based on your entity name.
+            UserRecord user = new UserRecord(userData[0].trim(), balance);
             databaseConduit.save(user);
         }
     }

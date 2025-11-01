@@ -1,46 +1,39 @@
 package com.jpmc.midascore.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import java.math.BigDecimal;
 
 @Entity
 public class UserRecord {
 
-    @Id
-    @GeneratedValue()
-    private long id;
+    @Id //
+    private String userId;
 
-    @Column(nullable = false)
-    private String name;
+    private BigDecimal balance;
 
-    @Column(nullable = false)
-    private float balance;
+    // Constructors
+    public UserRecord() {}
 
-    protected UserRecord() {
-    }
-
-    public UserRecord(String name, float balance) {
-        this.name = name;
+    public UserRecord(String userId, BigDecimal balance) {
+        this.userId = userId;
         this.balance = balance;
     }
 
-    @Override
-    public String toString() {
-        return String.format("User[id=%d, name='%s', balance='%f'", id, name, balance);
+    // Getters and Setters (Necessary for JPA and business logic)
+    public String getUserId() {
+        return userId;
     }
 
-    public Long getId() {
-        return id;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public float getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(float balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
 }
