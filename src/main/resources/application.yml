@@ -1,28 +1,19 @@
-spring:
-  kafka:
-    # ----------------------------------------------------
-    # PRODUCER CONFIGURATION (Used by TaskTwoTests to send the Transaction object)
-    # ----------------------------------------------------
-    producer:
-      # Use JSON serializer to convert Transaction objects to JSON strings
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      # Use the embedded broker provided by the test environment
-      bootstrap-servers: ${spring.embedded.kafka.brokers}
+server:
+  port: 33400
 
-    # ----------------------------------------------------
-    # CONSUMER CONFIGURATION (Used by your TransactionListener to receive the object)
-    # ----------------------------------------------------
-    consumer:
-      # Use JSON deserializer to convert JSON strings back to Transaction objects
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      # CRITICAL: Tell the deserializer which specific Java class to convert the JSON back into
-      properties:
-        spring.json.value.default.type: com.jpmc.midascore.kafka.Transaction
-        # Configure a group ID for the consumer (standard Kafka requirement)
-      group-id: midas-core-group
-
-# ----------------------------------------------------
-# GENERAL APPLICATION PROPERTIES (Required by your @KafkaListener)
-# ----------------------------------------------------
 general:
   kafka-topic: transactions_topic
+
+spring:
+  kafka: { bootstrap-servers: localhost:9092 }
+
+  main:
+    allow-bean-definition-overriding: true
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+
+logging:
+  level:
+    root: INFO

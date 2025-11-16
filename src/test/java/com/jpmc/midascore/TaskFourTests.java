@@ -1,5 +1,6 @@
 package com.jpmc.midascore;
 
+import com.jpmc.midascore.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,14 +9,28 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 
-@SpringBootTest
+@SpringBootTest(
+        properties = {
+                // Keeps the port fix
+                "spring.kafka.bootstrap-servers=localhost:9092",
+
+                // 💡 CRITICAL FIX: Tells the client not to use modern version requests
+                "spring.kafka.producer.properties.api.version.request=false",
+                "spring.kafka.consumer.properties.api.version.request=false",
+
+                // This is often needed for embedded brokers to ensure a compatible message format
+                "spring.kafka.producer.properties.log.message.format.version=0.10.2.0"
+        }
+)
 @DirtiesContext
-@EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
+
 public class TaskFourTests {
     static final Logger logger = LoggerFactory.getLogger(TaskFourTests.class);
 
+    // ... (rest of the class is the same)
+
     @Autowired
-    private KafkaProducer kafkaProducer;
+    private KafkaProducer kafkaProducer; // Ignore IDE warning: Assigned by Spring
 
     @Autowired
     private UserPopulator userPopulator;
@@ -23,24 +38,32 @@ public class TaskFourTests {
     @Autowired
     private FileLoader fileLoader;
 
+    @Autowired // 💡
+    private UserRepository userRepository;
+
+    // Inside TaskFourTests.java
+// ...
     @Test
     void task_four_verifier() throws InterruptedException {
         userPopulator.populate();
+
         String[] transactionLines = fileLoader.loadStrings("/test_data/alskdjfh.fhdjsk");
         for (String transactionLine : transactionLines) {
             kafkaProducer.send(transactionLine);
         }
-        Thread.sleep(2000);
 
+        // Wait for Kafka + Incentive API to process
+        Thread.sleep(5000);
 
-        logger.info("----------------------------------------------------------");
-        logger.info("----------------------------------------------------------");
-        logger.info("----------------------------------------------------------");
-        logger.info("use your debugger to find out what wilbur's balance is after all transactions are processed");
-        logger.info("kill this test once you find the answer");
-        while (true) {
-            Thread.sleep(20000);
-            logger.info("...");
-        }
+        // ✅ Print Wilbur's balance
+        var wilburBalance = userRepository.findByUserId("wilbur")
+                .map(user -> user.getBalance())
+                .orElse(null);
+
+        System.out.println("----------------------------------------------------------");
+        System.out.println("💰 WILBUR BALANCE = " + wilburBalance);
+        System.out.println("----------------------------------------------------------");
+
+        logger.info("✅ Test completed successfully.");
     }
 }

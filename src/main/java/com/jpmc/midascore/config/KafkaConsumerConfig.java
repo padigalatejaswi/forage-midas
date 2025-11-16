@@ -20,20 +20,18 @@ public class KafkaConsumerConfig {
 
     @Bean
     public ConsumerFactory<String, Transaction> consumerFactory() {
-        JsonDeserializer<Transaction> deserializer = new JsonDeserializer<>(Transaction.class);
-        deserializer.addTrustedPackages("*");
-
         Map<String, Object> props = new HashMap<>();
-        // ✅ Embedded Kafka automatically sets this system property when tests run
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                System.getProperty("spring.embedded.kafka.brokers"));
+
+        // minimal working defaults; embedded kafka will override bootstrap servers
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9093");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "midas-group");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.jpmc.midascore.kafka");
 
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
+                new JsonDeserializer<>(Transaction.class, false));
     }
-
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, Transaction> kafkaListenerContainerFactory() {

@@ -1,13 +1,11 @@
 package com.jpmc.midascore.repository;
 
-import com.jpmc.midascore.entity.UserRecord; // 👈 Ensure you use the correct entity name (User or UserRecord)
-import org.springframework.data.jpa.repository.JpaRepository; // 👈 CRITICAL: Use JpaRepository
-import org.springframework.stereotype.Repository;
+import com.jpmc.midascore.entity.UserRecord;
+import org.springframework.data.repository.CrudRepository;
+import java.util.Optional;
 
-@Repository
-// 🚨 CORRECT INTERFACE: JpaRepository and use String for the primary key (userId)
-public interface UserRepository extends JpaRepository<UserRecord, String> {
+public interface UserRepository extends CrudRepository<UserRecord, String> {
 
-    // NO NEED to define findById(String id) here.
-    // It is inherited from JpaRepository and returns Optional<User>.
+    // Required by TaskFourTests
+    Optional<UserRecord> findByUserId(String userId);
 }
